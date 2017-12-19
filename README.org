@@ -1,1 +1,6 @@
 * Rose-Hulman AI XPrize Neural Network
+[[https://travis-ci.org/RHIT-XPrize/rhit-xprize-neural-network.svg?branch=master]]
+
+This repository hosts the neural network component of Rose-Hulman's AI
+XPrize robot. For more detailed information of the project as a whole,
+see [[https://github.com/RHIT-XPrize/rhit-xprize-pipeline][this repo]].
