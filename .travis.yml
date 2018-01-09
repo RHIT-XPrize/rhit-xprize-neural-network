@@ -1,0 +1,10 @@
+language: python
+sudo: enabled
+python:
+  - "3.6"
+
+install:
+  - sudo pip install pytest
+
+script:
+  - pytest
