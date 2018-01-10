@@ -92,25 +92,6 @@ def test_get_moved_block():
     assert moved_block.side1_letter == 'A'
     assert moved_block.side1_color == 'red'
 
-# it is criminal that this is not built in
-def list_contains(longer, shorter):
-    if shorter == []:
-        return True
-    if longer == []:
-        return False
-    if shorter[0] == longer[0]:
-        return list_contains(longer[1:], shorter[1:]) or \
-            list_contains(longer[1:], shorter)
-    return list_contains(longer[1:], shorter)
-
-def test_list_contains():
-    assert list_contains([], [])
-    assert list_contains([1], [])
-    assert list_contains([1], [1])
-    assert list_contains([1, 2, 3, 4], [2, 3])
-    assert not list_contains([], [2, 3])
-    assert not list_contains([1, 2], [2, 3])
-    assert not list_contains([1, 3, 2], [2, 3])
 
 class TestListRepresentations():
     def setup_method(self):
