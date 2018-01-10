@@ -11,6 +11,9 @@ Classes
 class NoActionException(Exception):
     pass
 
+class InvalidActionException(Exception):
+    pass
+
 
 class Block:
     last_id = 0
@@ -123,18 +126,21 @@ class Configuration:
 
     def scatter(self):
         return Configuration(list(map(randomize_block,
-                                      self.current_blocks + self.final_blocks)))
+                                      self.get_all_blocks())))
 
     def list_representation(self):
-        all_blocks = self.current_blocks + self.final_blocks
+        all_blocks = self.get_all_blocks()
         return [x for b in all_blocks for x in b.list_representation()]
 
     def __str__(self):
         # :(
-        return str(list(map(str, self.current_blocks + self.final_blocks)))
+        return str(list(map(str, self.get_all_blocks())))
 
     def mark_complete(self):
-        return Configuration([], self.current_blocks + self.final_blocks)
+        return Configuration([], self.get_all_blocks())
+
+    def get_all_blocks(self):
+        return self.current_blocks + self.final_blocks
 
 
 class Action:
@@ -143,12 +149,15 @@ class Action:
         self.end_conf = end_conf
         self.instruction = instruction
 
-    def list_representation(self):
+    def get_moved_block(self):
         for block in self.end_conf.final_blocks:
             if not block in self.start_conf.final_blocks:
-                moved_block = block
-                break
+                return block
+        raise InvalidActionException('Action has no moved block')
+
+    def list_representation(self):
         start_list_repr = self.start_conf.list_representation()
+        moved_block = self.get_moved_block()
         return start_list_repr + [
             moved_block.block_id,
             moved_block.position[0],
