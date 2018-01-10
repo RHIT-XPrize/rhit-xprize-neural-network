@@ -122,7 +122,7 @@ class TestGenerateAction:
         action = base_config.generate_action(self.goal_config)
 
         assert action.start_conf == base_config
-        assert action.phrase == self.instruction
+        assert action.instruction == self.instruction
 
         self.assert_action_current_blocks(action)
         self.assert_action_final_blocks(action)
@@ -134,7 +134,7 @@ class TestGenerateAction:
         action = base_config.generate_action(self.goal_config)
 
         assert action.start_conf == base_config
-        assert action.phrase == self.instruction
+        assert action.instruction == self.instruction
 
         self.assert_action_current_blocks(action)
         self.assert_action_final_blocks(action)
