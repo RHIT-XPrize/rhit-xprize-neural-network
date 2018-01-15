@@ -94,11 +94,6 @@ def test_get_moved_block():
 
 
 class TestListRepresentations():
-    def setup_method(self):
-        self.start_conf = gi.random_configuration(2, ['A'], ['red'])
-        self.end_conf = self.start_conf.scatter().mark_complete()
-        self.block = self.start_conf.current_blocks[0]
-
     def test_block_list_representation(self):
         block = gi.random_block(['A'], ['red'])
         [_, letter1, color1, letter2, color2, x, y] = block.list_representation()
