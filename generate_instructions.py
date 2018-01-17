@@ -34,6 +34,9 @@ class Block:
     def __eq__(self, other):
         return type(other) == type(self) and self.block_id == other.block_id
 
+    def __lt__(self, other):
+        return self.block_id < other.block_id
+
     def looks_the_same(self, other):
         return self.side1_letter == other.side1_letter and \
             self.side1_color == other.side1_color and \
@@ -146,24 +149,11 @@ class Configuration:
         return Configuration([], self.current_blocks + self.final_blocks)
 
     def __eq__(self, other):
-        def block_list_subset(block_ls1, block_ls2):
-            block_ls1_copy = block_ls1[:]
-            block_ls2_copy = block_ls2[:]
-            for b in block_ls1_copy:
-                try:
-                    other = block_ls2_copy[block_ls2_copy.index(b)]
-                    block_ls2_copy.remove(other)
-                except:
-                    return False
-                if not b.looks_the_same(other):
-                    return False
-            return True
+        eq_helper = lambda ls1, ls2: all([x == y and x.looks_the_same(y) \
+                                     for (x, y) in zip(sorted(ls1), sorted(ls2))])
 
-        # a is a subset of b and b is a subset of a
-        return block_list_subset(self.current_blocks, other.current_blocks) and \
-            block_list_subset(other.current_blocks, self.current_blocks) and \
-            block_list_subset(self.final_blocks, other.final_blocks) and \
-            block_list_subset(other.final_blocks, self.final_blocks)
+        return eq_helper(self.current_blocks, other.current_blocks) and \
+            eq_helper(self.final_blocks, other.final_blocks)
 
 
 class Action:
