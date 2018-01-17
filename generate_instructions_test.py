@@ -264,8 +264,4 @@ class TestSolveBoard:
         actions = gi.solve_board(start_config, final_config)
         solved_config = actions[len(actions) - 1].end_conf
 
-        print(str(start_config))
-        print(str(final_config))
-        print(str(solved_config))
-
         assert final_config == solved_config
