@@ -32,10 +32,13 @@ class Block:
         self.block_id = block_id if block_id > 0 else Block.get_next_block_id()
 
     def __eq__(self, other):
-        return self.block_id == other.block_id
+        return type(other) == type(self) and self.block_id == other.block_id
 
-    def __ne__(self, other):
-        return not self == other
+    def looks_the_same(self, other):
+        return self.side1_letter == other.side1_letter and \
+            self.side1_color == other.side1_color and \
+            self.side2_letter == other.side2_letter and \
+            self.side2_color == other.side2_color
 
     def shift_to(self, position):
         return Block(
@@ -63,6 +66,16 @@ class Block:
              self.side2_letter, self.side2_color,
              self.position, self.block_id)
 
+def create_move_instruction(block):
+    point = block.position
+    phrase = 'move the %s %s block here' \
+                % (block.side1_color,
+                   block.side1_letter)
+    return Instruction(phrase, point)
+
+def create_flip_instruction(block):
+    phrase = 'flip the %s %s block here' % (block.side1_color, block.side1_letter)
+    return Instruction(phrase, block.position)
 
 class Instruction:
     def __init__(self, phrase, point):
@@ -81,28 +94,37 @@ class Configuration:
     def is_complete(self):
         return self.current_blocks == []
 
-    @staticmethod
-    def get_instruction(moved_block):
-        point = moved_block.position
-        phrase = 'move the %s %s block here' \
-                 % (moved_block.side1_color,
-                    moved_block.side1_letter)
-        return Instruction(phrase, point)
-
     def generate_action(self, goal_config):
         if self.is_complete():
             raise NoActionException('Board is already complete')
 
         block_to_move = rand_element(self.current_blocks)
-        moved_block_index = goal_config.final_blocks.index(block_to_move)
-        moved_block = goal_config.final_blocks[moved_block_index]
+
+        goal_block_index = goal_config.final_blocks.index(block_to_move)
+        goal_block = goal_config.final_blocks[goal_block_index]
+
+        should_flip_block = not block_to_move.looks_the_same(goal_block)
         new_current_blocks = self.current_blocks[:]
-        new_current_blocks.remove(moved_block)
+        new_final_blocks = self.final_blocks
+        if should_flip_block:
+            moved_block = block_to_move.flip()
+            new_current_blocks.remove(block_to_move)
+            new_current_blocks.append(moved_block)
+        else:
+            moved_block = goal_block
+            new_current_blocks.remove(block_to_move)
+            new_final_blocks = new_final_blocks + [moved_block]
+
         new_configuration = Configuration(
             new_current_blocks,
-            self.final_blocks + [moved_block]
+            new_final_blocks
         )
-        instruction = Configuration.get_instruction(moved_block)
+
+        if should_flip_block:
+            instruction = create_flip_instruction(moved_block)
+        else:
+            instruction = create_move_instruction(moved_block)
+
         return Action(self, new_configuration, instruction)
 
     def scatter(self):
@@ -115,6 +137,26 @@ class Configuration:
 
     def mark_complete(self):
         return Configuration([], self.current_blocks + self.final_blocks)
+
+    def __eq__(self, other):
+        def block_list_subset(block_ls1, block_ls2):
+            block_ls1_copy = block_ls1[:]
+            block_ls2_copy = block_ls2[:]
+            for b in block_ls1_copy:
+                try:
+                    other = block_ls2_copy[block_ls2_copy.index(b)]
+                    block_ls2_copy.remove(other)
+                except:
+                    return False
+                if not b.looks_the_same(other):
+                    return False
+            return True
+
+        # a is a subset of b and b is a subset of a
+        return block_list_subset(self.current_blocks, other.current_blocks) and \
+            block_list_subset(other.current_blocks, self.current_blocks) and \
+            block_list_subset(self.final_blocks, other.final_blocks) and \
+            block_list_subset(other.final_blocks, self.final_blocks)
 
 
 class Action:
@@ -157,11 +199,10 @@ def random_block(letters, colors):
         position
     )
 
-
 def randomize_block(block):
     def maybe_flip(b):
-        # if random() < 0.0:
-        #     return b.flip()
+        if random() < 0.5:
+            return b.flip()
         return b
     def maybe_shift(b):
         if random() < 0.95:
