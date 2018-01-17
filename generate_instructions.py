@@ -94,16 +94,7 @@ class Configuration:
     def is_complete(self):
         return self.current_blocks == []
 
-    def generate_action(self, goal_config):
-        if self.is_complete():
-            raise NoActionException('Board is already complete')
-
-        block_to_move = rand_element(self.current_blocks)
-
-        goal_block_index = goal_config.final_blocks.index(block_to_move)
-        goal_block = goal_config.final_blocks[goal_block_index]
-
-        should_flip_block = not block_to_move.looks_the_same(goal_block)
+    def _get_next_config_and_block(self, goal_block, should_flip_block, block_to_move):
         new_current_blocks = self.current_blocks[:]
         new_final_blocks = self.final_blocks
         if should_flip_block:
@@ -115,9 +106,25 @@ class Configuration:
             new_current_blocks.remove(block_to_move)
             new_final_blocks = new_final_blocks + [moved_block]
 
-        new_configuration = Configuration(
+        return moved_block, Configuration(
             new_current_blocks,
             new_final_blocks
+        )
+
+    def generate_action(self, goal_config):
+        if self.is_complete():
+            raise NoActionException('Board is already complete')
+
+        block_to_move = rand_element(self.current_blocks)
+
+        goal_block_index = goal_config.final_blocks.index(block_to_move)
+        goal_block = goal_config.final_blocks[goal_block_index]
+
+        should_flip_block = not block_to_move.looks_the_same(goal_block)
+        (moved_block, new_configuration) = self._get_next_config_and_block(
+            goal_block,
+            should_flip_block,
+            block_to_move
         )
 
         if should_flip_block:

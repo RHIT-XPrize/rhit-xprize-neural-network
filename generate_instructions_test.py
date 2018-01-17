@@ -18,6 +18,8 @@ def test_block_looks_the_same():
 
     assert block.looks_the_same(block)
     assert block.looks_the_same(gi.Block('A', 'Blue', 'B', 'Red', (0, 0)))
+    assert block.looks_the_same(gi.Block('A', 'Blue', 'B', 'Red', (99, 99)))
+    assert not block.looks_the_same(gi.Block('A', 'Blue', 'B', 'Green', (0, 0)))
 
 def test_block_shift_to_keeps_id():
     base_block = gi.Block('A', 'BLUE', 'B', 'GREEN', (0, 0))
