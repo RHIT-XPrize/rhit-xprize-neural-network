@@ -37,10 +37,16 @@ class Block:
         self.block_id = block_id if block_id > 0 else Block.get_next_block_id()
 
     def __eq__(self, other):
-        return self.block_id == other.block_id
+        return type(other) == type(self) and self.block_id == other.block_id
 
-    def __ne__(self, other):
-        return not self == other
+    def __lt__(self, other):
+        return self.block_id < other.block_id
+
+    def looks_the_same(self, other):
+        return self.side1_letter == other.side1_letter and \
+            self.side1_color == other.side1_color and \
+            self.side2_letter == other.side2_letter and \
+            self.side2_color == other.side2_color
 
     def shift_to(self, position):
         return Block(
@@ -79,6 +85,16 @@ class Block:
              self.side2_letter, self.side2_color,
              self.position, self.block_id)
 
+def create_move_instruction(block):
+    point = block.position
+    phrase = 'move the %s %s block here' \
+                % (block.side1_color,
+                   block.side1_letter)
+    return Instruction(phrase, point)
+
+def create_flip_instruction(block):
+    phrase = 'flip the %s %s block here' % (block.side1_color, block.side1_letter)
+    return Instruction(phrase, block.position)
 
 class Instruction:
     def __init__(self, phrase, point):
@@ -100,28 +116,44 @@ class Configuration:
     def is_complete(self):
         return self.current_blocks == []
 
-    @staticmethod
-    def get_instruction(moved_block):
-        point = moved_block.position
-        phrase = 'move the %s %s block here' \
-                 % (moved_block.side1_color,
-                    moved_block.side1_letter)
-        return Instruction(phrase, point)
+    def _get_next_config_and_block(self, goal_block, should_flip_block, block_to_move):
+        new_current_blocks = self.current_blocks[:]
+        new_final_blocks = self.final_blocks
+        if should_flip_block:
+            moved_block = block_to_move.flip()
+            new_current_blocks.remove(block_to_move)
+            new_current_blocks.append(moved_block)
+        else:
+            moved_block = goal_block
+            new_current_blocks.remove(block_to_move)
+            new_final_blocks = new_final_blocks + [moved_block]
+
+        return moved_block, Configuration(
+            new_current_blocks,
+            new_final_blocks
+        )
 
     def generate_action(self, goal_config):
         if self.is_complete():
             raise NoActionException('Board is already complete')
 
         block_to_move = rand_element(self.current_blocks)
-        moved_block_index = goal_config.final_blocks.index(block_to_move)
-        moved_block = goal_config.final_blocks[moved_block_index]
-        new_current_blocks = self.current_blocks[:]
-        new_current_blocks.remove(moved_block)
-        new_configuration = Configuration(
-            new_current_blocks,
-            self.final_blocks + [moved_block]
+
+        goal_block_index = goal_config.final_blocks.index(block_to_move)
+        goal_block = goal_config.final_blocks[goal_block_index]
+
+        should_flip_block = not block_to_move.looks_the_same(goal_block)
+        (moved_block, new_configuration) = self._get_next_config_and_block(
+            goal_block,
+            should_flip_block,
+            block_to_move
         )
-        instruction = Configuration.get_instruction(moved_block)
+
+        if should_flip_block:
+            instruction = create_flip_instruction(moved_block)
+        else:
+            instruction = create_move_instruction(moved_block)
+
         return Action(self, new_configuration, instruction)
 
     def scatter(self):
@@ -141,6 +173,13 @@ class Configuration:
 
     def get_all_blocks(self):
         return self.current_blocks + self.final_blocks
+
+    def __eq__(self, other):
+        eq_helper = lambda ls1, ls2: all([x == y and x.looks_the_same(y) \
+                                     for (x, y) in zip(sorted(ls1), sorted(ls2))])
+
+        return eq_helper(self.current_blocks, other.current_blocks) and \
+            eq_helper(self.final_blocks, other.final_blocks)
 
 
 class Action:
@@ -198,11 +237,10 @@ def random_block(letters, colors):
         position
     )
 
-
 def randomize_block(block):
     def maybe_flip(b):
-        # if random() < 0.0:
-        #     return b.flip()
+        if random() < 0.5:
+            return b.flip()
         return b
     def maybe_shift(b):
         if random() < 0.95:

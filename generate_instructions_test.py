@@ -1,4 +1,5 @@
 import generate_instructions as gi
+import string
 
 """
 Block tests
@@ -11,6 +12,14 @@ def test_block_inequality_with_generated_ids():
 def test_block_equality_with_given_ids():
     assert gi.Block('A', 'BLUE', 'B', 'GREEN', (0, 0), 30) \
         == gi.Block('D', 'YELLOW', 'C', 'ORANGE', (-1, 2), 30)
+
+def test_block_looks_the_same():
+    block = gi.Block('A', 'Blue', 'B', 'Red', (0, 0))
+
+    assert block.looks_the_same(block)
+    assert block.looks_the_same(gi.Block('A', 'Blue', 'B', 'Red', (0, 0)))
+    assert block.looks_the_same(gi.Block('A', 'Blue', 'B', 'Red', (99, 99)))
+    assert not block.looks_the_same(gi.Block('A', 'Blue', 'B', 'Green', (0, 0)))
 
 def test_block_shift_to_keeps_id():
     base_block = gi.Block('A', 'BLUE', 'B', 'GREEN', (0, 0))
@@ -56,6 +65,18 @@ def test_block_flip_swaps_visuals():
     assert base_block.side2_letter == flipped_block.side1_letter
     assert base_block.side2_color == flipped_block.side1_color
 
+def test_random_block():
+    letters = ['A', 'B', 'C', 'D']
+    colors = ['BLUE', 'GREEN', 'RED', 'YELLOW']
+    block = gi.random_block(letters, colors)
+
+    assert block.side1_letter in letters
+    assert block.side2_letter in letters
+    assert block.side1_color in colors
+    assert block.side2_color in colors
+    assert block.position[0] > 0
+    assert block.position[1] > 0
+
 
 """
 Configuration
@@ -70,16 +91,16 @@ def test_is_complete_nonempty_current_empty_final():
 def test_is_complete_nonempty_current_nonempty_final():
     assert not gi.Configuration([1], [2]).is_complete()
 
-def test_get_instruction_phrase():
+def test_get_move_instruction_phrase():
     moved_block = gi.Block('A', 'BLUE', 'B', 'GREEN', (1, 2))
-    instruction = gi.Configuration.get_instruction(moved_block)
+    instruction = gi.create_move_instruction(moved_block)
 
     assert 'A' in instruction.phrase
     assert 'BLUE' in instruction.phrase
 
 def test_get_instruction_point():
     moved_block = gi.Block('A', 'BLUE', 'B', 'GREEN', (1, 2))
-    instruction = gi.Configuration.get_instruction(moved_block)
+    instruction = gi.create_move_instruction(moved_block)
 
     assert instruction.point == (1, 2)
 
@@ -161,12 +182,12 @@ class TestGenerateAction:
         def mock_get_instruction(block):
             return self.instruction
 
-        self.orig_get_instruction = gi.Configuration.get_instruction
-        gi.Configuration.get_instruction = mock_get_instruction
+        self.orig_get_instruction = gi.create_move_instruction
+        gi.create_move_instruction = mock_get_instruction
 
     def teardown_method(self):
         gi.rand_element = self.orig_rand_element
-        gi.Configuration.get_instruction = self.orig_get_instruction
+        gi.create_move_instruction = self.orig_get_instruction
 
     def test_generate_action_complete_board(self):
         finished_configuration = gi.Configuration([])
@@ -262,25 +283,7 @@ class TestScatter:
         assert scattered_config.final_blocks == []
         assert scattered_config.current_blocks == self.scattered_blocks
 
-def test_random_block():
-    indexer = {}
-    indexer['rand_index'] = 0
-
-    random_position = (23, 54)
-
-    letters = ['A', 'B', 'C', 'D']
-    colors = ['BLUE', 'GREEN', 'RED', 'YELLOW']
-    block = gi.random_block(letters, colors)
-
-    assert block.side1_letter in letters
-    assert block.side2_letter in letters
-    assert block.side1_color in colors
-    assert block.side2_color in colors
-    assert block.position[0] > 0
-    assert block.position[1] > 0
-
 class TestSolveBoard:
-    # TODO: Add test for flips once implemented
     def setup_method(self):
         initial_config = gi.Configuration([
             gi.Block('A', 'BLUE', 'B', 'YELLOW', (0, 1), 1),
@@ -288,25 +291,18 @@ class TestSolveBoard:
             gi.Block('E', 'ORANGE', 'F', 'PURPLE', (2, 3), 3)])
         self.goal_config = gi.Configuration([], [
             gi.Block('A', 'BLUE', 'B', 'YELLOW', (0, 2), 1),
-            gi.Block('C', 'GREEN', 'D', 'RED', (1, 3), 2),
+            gi.Block('D', 'RED', 'C', 'GREEN', (1, 3), 2),
             gi.Block('E', 'ORANGE', 'F', 'PURPLE', (2, 4), 3)])
         self.actions = gi.solve_board(initial_config, self.goal_config)
 
     def test_solve_board_length(self):
-        assert len(self.actions) == 3
+        assert len(self.actions) == 4
 
     def test_solve_board_consecutive_configurations(self):
         for index, action in enumerate(self.actions[0:-2]):
             next_action = self.actions[index + 1]
 
             assert action.end_conf == next_action.start_conf
-
-    def test_solve_board_single_changes(self):
-        for action in self.actions:
-            assert len(action.end_conf.final_blocks) \
-                == len(action.start_conf.final_blocks) + 1
-            assert len(action.start_conf.current_blocks) \
-                == len(action.end_conf.current_blocks) + 1
 
     def test_solve_board_final_action_yields_goal(self):
         final_config = self.actions[-1].end_conf
@@ -317,3 +313,16 @@ class TestSolveBoard:
             assert block in self.goal_config.final_blocks
         for block in self.goal_config.final_blocks:
             assert block in final_config.final_blocks
+
+    def test_solve_board_stress(self):
+        num_blocks = 500
+        letters = string.ascii_uppercase
+        colors = ['Red', 'Green', 'Blue', 'Gold', 'Brown', 'Purple', 'Yellow', 'Pink']
+
+        start_config = gi.random_configuration(num_blocks, letters, colors)
+        final_config = start_config.scatter().mark_complete()
+
+        actions = gi.solve_board(start_config, final_config)
+        solved_config = actions[len(actions) - 1].end_conf
+
+        assert final_config == solved_config
