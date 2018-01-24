@@ -5,6 +5,9 @@ python:
 
 install:
   - sudo pip install pytest
+  - sudo pip install pylint
 
 script:
   - pytest
+  - pylint -E generate_instructions
+  - pylint -E generate_instructions_test
