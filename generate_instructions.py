@@ -204,7 +204,7 @@ class Action:
         ] + self.instruction.list_representation()
 
     def __str__(self):
-        return str(self.phrase)
+        return str(self.instruction)
 
 
 """
