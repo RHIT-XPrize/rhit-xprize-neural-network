@@ -83,6 +83,65 @@ def test_get_instruction_point():
 
     assert instruction.point == (1, 2)
 
+def test_get_moved_block():
+    start_conf = gi.random_configuration(1, ['A'], ['red'])
+    end_conf = start_conf.scatter().mark_complete()
+    [action] = gi.solve_board(start_conf, end_conf)
+
+    moved_block = action.get_moved_block()
+    assert moved_block.side1_letter == 'A'
+    assert moved_block.side1_color == 'red'
+
+
+class TestListRepresentations():
+    def test_block_list_representation(self):
+        block = gi.random_block(['A'], ['red'])
+        [_, letter1, color1, letter2, color2, x, y] = block.list_representation()
+
+        assert block.side1_letter == letter1
+        assert block.side1_color == color1
+        assert block.side2_letter == letter2
+        assert block.side2_color == color2
+        assert block.position[0] == x
+        assert block.position[1] == y
+
+    def test_instruction_list_representation(self):
+        inst = gi.Instruction('foobar', (1, 2))
+        [phrase, x, y] = inst.list_representation()
+
+        assert 'foobar' == phrase
+        assert 1 == x
+        assert 2 == y
+
+    def test_configuration_list_representation(self):
+        start_conf = gi.random_configuration(2, ['A', 'B'], ['red', 'green'])
+        list_repr = start_conf.list_representation()
+
+        block1 = start_conf.get_all_blocks()[0]
+        block2 = start_conf.get_all_blocks()[1]
+
+        b1_list_repr = block1.list_representation()
+        b2_list_repr = block2.list_representation()
+
+        assert list_repr == b1_list_repr + b2_list_repr
+
+    def test_action_list_representation(self):
+        start_conf = gi.random_configuration(2, ['A', 'B'], ['red', 'green'])
+        end_conf = start_conf.scatter().mark_complete()
+        actions = gi.solve_board(start_conf, end_conf)
+
+        action = actions[0]
+        moved_block = action.get_moved_block()
+        inst = action.instruction
+        list_repr = action.list_representation()
+
+        assert list_repr == start_conf.list_representation() + \
+            [moved_block.block_id,
+             moved_block.position[0],
+             moved_block.position[1]] + \
+             inst.list_representation()
+
+
 class TestGenerateAction:
     def setup_method(self):
         self.moved_block = gi.Block('A', 'BLUE', 'B', 'GREEN', (1, 2), 1)
@@ -122,7 +181,7 @@ class TestGenerateAction:
         action = base_config.generate_action(self.goal_config)
 
         assert action.start_conf == base_config
-        assert action.phrase == self.instruction
+        assert action.instruction == self.instruction
 
         self.assert_action_current_blocks(action)
         self.assert_action_final_blocks(action)
@@ -134,7 +193,7 @@ class TestGenerateAction:
         action = base_config.generate_action(self.goal_config)
 
         assert action.start_conf == base_config
-        assert action.phrase == self.instruction
+        assert action.instruction == self.instruction
 
         self.assert_action_current_blocks(action)
         self.assert_action_final_blocks(action)
