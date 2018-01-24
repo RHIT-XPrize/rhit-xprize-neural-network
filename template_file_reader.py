@@ -1,8 +1,5 @@
 import random
 
-_flip_templates = None
-_move_templates = None
-
 with open('flip_templates.txt') as flip_templates_file:
     _flip_templates = flip_templates_file.readlines()
 
