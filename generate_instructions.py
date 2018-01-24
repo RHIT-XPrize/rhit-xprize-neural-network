@@ -188,10 +188,22 @@ class Action:
         self.end_conf = end_conf
         self.instruction = instruction
 
-    def get_moved_block(self):
+    def _get_translated_block(self):
         for block in self.end_conf.final_blocks:
             if not block in self.start_conf.final_blocks:
                 return block
+
+    def _get_flipped_block(self):
+        for block in self.end_conf.current_blocks:
+            for other_block in self.start_conf.current_blocks:
+                if (other_block == block and
+                    other_block.flip().looks_the_same(block)):
+                    return block
+
+    def get_moved_block(self):
+        moved_block = self._get_translated_block() or self._get_flipped_block()
+        if moved_block:
+            return moved_block
         raise InvalidActionException('Action has no moved block')
 
     def list_representation(self):
