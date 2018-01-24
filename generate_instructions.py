@@ -2,6 +2,7 @@ from random import randint, random
 import sys
 import csv
 
+import template_file_reader as tr
 
 """
 Classes
@@ -87,13 +88,11 @@ class Block:
 
 def create_move_instruction(block):
     point = block.position
-    phrase = 'move the %s %s block here' \
-                % (block.side1_color,
-                   block.side1_letter)
+    phrase = tr.read_move_template(block.side1_color, block.side1_letter)
     return Instruction(phrase, point)
 
 def create_flip_instruction(block):
-    phrase = 'flip the %s %s block here' % (block.side1_color, block.side1_letter)
+    phrase = tr.read_flip_template(block.side1_color, block.side1_letter)
     return Instruction(phrase, block.position)
 
 class Instruction:
