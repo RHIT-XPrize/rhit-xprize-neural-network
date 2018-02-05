@@ -18,7 +18,7 @@ SYMBOLS = np.asarray(list('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz 
 N_SYMBOLS = len(SYMBOLS)
 TOKENS = dict((c, i) for i, c in enumerate(SYMBOLS))
 MAX_LEN = 256
-MAX_BLOCKS= 10;
+MAX_BLOCKS = 10;
 
 def tokenize_string(s):
     ret = np.zeros((MAX_LEN, N_SYMBOLS), dtype=bool)
@@ -27,6 +27,7 @@ def tokenize_string(s):
     return ret
 
 def tokenize(a):
+    # return tokenize_string(a)
     return np.array(list(map(lambda s: tokenize_string(s), list(a))))
 
 ##function to build the net easily
@@ -45,56 +46,39 @@ def color_cat(s):
         return 2
     elif s == 'RED':
         return 3
-    else:
-        return 4
+    raise RuntimeError('Unrecognized color:', s)
 
 ## turn all the words into numbers, replace with more elgeant solution for varying amounts of letters and words later
 def encode_state(state):
-    state.block0_side1_letter = state.block0_side1_letter.apply(ord)-ord('A')+1
-    state.block0_side2_letter = state.block0_side2_letter.apply(ord)-ord('A')+1
-    state.block1_side1_letter = state.block1_side1_letter.apply(ord)-ord('A')+1
-    state.block1_side2_letter = state.block1_side2_letter.apply(ord)-ord('A')+1
-    state.block0_side1_color=state.block0_side1_color.apply(color_cat)
-    state.block0_side2_color=state.block0_side2_color.apply(color_cat)
-    state.block1_side1_color=state.block1_side1_color.apply(color_cat)
-    state.block1_side2_color=state.block1_side2_color.apply(color_cat)
+    for i in range(len(state)):
+        curr_state = state[i]
+        assert len(curr_state) % 7 == 0
+        for block_offset in range(0, len(curr_state), 7):
+            curr_state[block_offset + 1] = \
+                ord(curr_state[block_offset + 1]) - ord('A') + 1
+            curr_state[block_offset + 3] = \
+                ord(curr_state[block_offset + 3]) - ord('A') + 1
+            curr_state[block_offset + 2] = \
+                color_cat(curr_state[block_offset + 2]) 
+            curr_state[block_offset + 4] = \
+                color_cat(curr_state[block_offset + 4]) 
+
     return state
-# take in the instruction from the commander, i went with 100 max length just as a guess
-words_input = Input(shape=(MAX_LEN,N_SYMBOLS), name='words_input')
-
-# # This embedding layer will encode the input sequence
-# # into a sequence of dense 512-dimensional vectors.
-# x1 = Embedding(output_dim=512, input_dim=10000, input_length=100)(words_input)
-words_lstm=LSTM(32)(words_input)
-
-#the point to pass in
-position_input = Input(shape=(2,), name='position_input')
-
-#the state, max bblocks is set above
-state_input = Input(shape=(14,),name='state_input')
-#state_input1 = keras.layers.Flatten()(state_input)
-network_input = keras.layers.concatenate([words_lstm, position_input,state_input])
-
-# # do actual building here, pull out later functionally do hyper parameter building
-Nodes=[32, 65, 128, 32]
-network = BuildNet(Nodes,network_input)
-
-block_id_output = Dense(1, activation='relu',name='block_id_output')(network)
-point_output= Dense(2,activation='relu',name='point_output')(network)
 
 class NetworkConfig:
     MAX_BLOCK_LAYERS = 5
     MAX_POINT_LAYERS = 5
     MAX_BOTH_LAYERS = 5
     NETWORK_SIZES = [16, 32, 64, 128, 254, 512]
-    def __init__(self, lstm_size, block_layers, point_layers, both_layers):
+    def __init__(self, num_blocks, lstm_size, block_layers, point_layers, both_layers):
         self.lstm_size = lstm_size
         self.block_layers = block_layers
         self.point_layers = point_layers
         self.both_layers = both_layers
+        self.num_blocks = num_blocks
 
     @staticmethod
-    def random_network_config():
+    def random_network_config(num_blocks):
         def create_layer_seq(num_layers):
             return list(map(lambda x: random.choice(NetworkConfig.NETWORK_SIZES),
                             [i for i in range(num_layers)]))
@@ -107,83 +91,67 @@ class NetworkConfig:
         point_layers = create_layer_seq(num_point_layers)
         both_layers = create_layer_seq(num_both_layers)
 
-        return NetworkConfig(lstm_size, block_layers, point_layers, both_layers)
+        return NetworkConfig(num_blocks, lstm_size, block_layers, point_layers, both_layers)
 
-def create_network(MAX_LEN, N_SYMBOLS):
-    config = NetworkConfig.random_network_config()
+def create_network(num_blocks, MAX_LEN, N_SYMBOLS):
+    config = NetworkConfig.random_network_config(num_blocks)
 
+    state_input = Input(shape=(7*num_blocks,),name='state_input')
     words_input = Input(shape=(MAX_LEN,N_SYMBOLS), name='words_input')
     words_lstm=LSTM(config.lstm_size)(words_input)
-    words_lstm = Dense(64, activation='relu')(words_lstm)
+    words_lstm = Dense(128, activation='relu')(words_lstm)
 
-    position_input = Input(shape=(2,), name='position_input')
-
-    network_input = keras.layers.concatenate([words_lstm, position_input,state_input])
+    network_input = keras.layers.concatenate([words_lstm, state_input])
 
     main_network = BuildNet(config.both_layers, network_input)
-    main_output = Dense(1, activation='relu', name='main_output')(main_network)
+    main_output = Dense(config.num_blocks, activation='softmax', name='main_output')(main_network)
 
     return Model(
-        inputs=[state_input,words_input,position_input],
+        inputs=[state_input,words_input],
         outputs=[main_output]
     )
 
 ##LOAD ALL THE DATA
-df_in = pd.read_csv('./neural_in.csv')
-df_out= pd.read_csv('./neural_out.csv')
+df_in = pd.read_csv('./neural_in.csv', header=None)
+df_out= pd.read_csv('./neural_out.csv', header=None)
 
 num_samples = df_in.shape[0]
 num_samples_training = int(num_samples * 0.25)
 
-train_points_in = df_in.iloc[:num_samples_training,15:17].values
-train_words_in = df_in.iloc[:num_samples_training,14:15].values[:,0]
-train_words_in = tokenize(train_words_in);
-train_state_in = df_in.iloc[:num_samples_training,:14]
-train_block_id_out = df_out.iloc[:num_samples_training,0].values
-train_points_out = df_out.iloc[:num_samples_training,1:3].values
-train_state_in = encode_state(train_state_in)
-train_state_in = train_state_in.values
+train_words_in = df_in.iloc[:num_samples_training,-1].values
 
-test_points_in = df_in.iloc[num_samples_training:,15:17].values
-test_words_in = df_in.iloc[num_samples_training:,14:15].values[:,0]
+train_words_in = tokenize(train_words_in)
+train_state_in = df_in.iloc[:num_samples_training,:-1]
+train_state_in = encode_state(train_state_in.values)
+
+test_words_in = df_in.iloc[num_samples_training:,-1].values
 test_words_in = tokenize(test_words_in);
-test_state_in = df_in.iloc[num_samples_training:,:14]
-test_block_id_out = df_out.iloc[num_samples_training:,0].values
-test_points_out = df_out.iloc[num_samples_training:,1:3].values
-test_state_in = encode_state(test_state_in)
-test_state_in = test_state_in.values
+test_state_in = df_in.iloc[num_samples_training:,:-1]
+test_state_in = encode_state(test_state_in.values)
 
-train_main_out = df_out.iloc[:num_samples_training,0:1]
-test_main_out = df_out.iloc[num_samples_training:,0:1]
-
-
-np.array(train_state_in[:10])
-np.array(train_words_in[:10])
-np.array(train_points_in[:10])
-
-
-##train
-# final_network.fit({'state_input':train_state_in, 'words_input':train_words_in, 'position_input':train_points_in},{'block_id_output':train_block_id_out,'point_output':train_points_out},epochs=10,batch_size=50)
+train_main_out = df_out.iloc[:num_samples_training,]
+test_main_out = df_out.iloc[num_samples_training:,]
 
 def main():
     epochs = 10
-    num_iterations = 20
+    num_iterations = 10
+    num_blocks = 10
 
     best_result = None
     best_network = None
     for x in range(num_iterations):
-        config = NetworkConfig.random_network_config()
-        final_network = create_network(MAX_LEN, N_SYMBOLS)
+        config = NetworkConfig.random_network_config(num_blocks)
+        final_network = create_network(num_blocks, MAX_LEN, N_SYMBOLS)
         final_network.compile(
             loss='mean_squared_error',
             optimizer='Adam',
             metrics=['accuracy']
         )
 
+        print('main output shape:', train_main_out.shape)
         history = final_network.fit({
             'state_input': np.array(train_state_in),
-            'words_input': np.array(train_words_in),
-            'position_input': np.array(train_points_in)
+            'words_input': np.array(train_words_in)
         }, {
             'main_output': np.array(train_main_out)
         },
@@ -194,8 +162,7 @@ def main():
 
         result = final_network.evaluate({
             'state_input': np.array(test_state_in),
-            'words_input': np.array(test_words_in),
-            'position_input': np.array(test_points_in)
+            'words_input': np.array(test_words_in)
         }, {
             'main_output': np.array(test_main_out)
         }, 
@@ -213,8 +180,7 @@ def main():
     print(np.array(train_main_out[:10]))
     print(best_network.predict({
         'state_input': np.array(train_state_in[:10]),
-        'words_input': np.array(train_words_in[:10]),
-        'position_input': np.array(train_points_in[:10])
+        'words_input': np.array(train_words_in[:10])
     }))
 
 
