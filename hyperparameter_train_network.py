@@ -13,6 +13,7 @@ from keras.layers import LSTM, Dropout, Input
 from keras import backend
 import tensorflow as tf
 import random
+import sys
 
 SYMBOLS = np.asarray(list('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz .,1234567890'))
 N_SYMBOLS = len(SYMBOLS)
@@ -56,9 +57,9 @@ def encode_states(states):
             curr_state[block_offset + 3] = \
                 ord(curr_state[block_offset + 3]) - ord('A') + 1
             curr_state[block_offset + 2] = \
-                color_cat(curr_state[block_offset + 2]) 
+                color_cat(curr_state[block_offset + 2])
             curr_state[block_offset + 4] = \
-                color_cat(curr_state[block_offset + 4]) 
+                color_cat(curr_state[block_offset + 4])
 
     return states
 
@@ -138,13 +139,35 @@ def load_data(neural_in, neural_out):
         'test_main_out': np.array(test_main_out)
     }
 
+def load_args():
+    if len(sys.argv) != 5:
+        print('Usage: hyperparameter_train_network.py <num-blocks> <neural-in-file> <neural-out-file> <h5-out-file>')
+        return None
+
+    args = {}
+
+    try:
+        args['num-blocks'] = int(sys.argv[1])
+    except:
+        print('Number of blocks must be an integer')
+
+    args['neural-in-file'] = sys.argv[2]
+    args['neural-out-file'] = sys.argv[3]
+    args['h5-out-file'] = sys.argv[4]
+
+    return args
 
 def main():
+    args = load_args()
+    if not args:
+        print('Aborting')
+        return
+
     epochs = 5
     num_iterations = 2
-    num_blocks = 2
+    num_blocks = args['num-blocks']
 
-    data = load_data('./neural_in.csv', 'neural_out.csv')
+    data = load_data(args['neural-in-file'], args['neural-out-file'])
 
     best_result = None
     best_network = None
@@ -173,7 +196,7 @@ def main():
             'words_input': data['test_words_in']
         }, {
             'main_output': data['test_main_out']
-        }, 
+        },
             verbose=True
         )
 
@@ -181,7 +204,7 @@ def main():
             best_network = final_network
             best_result = result
 
-    best_network.save('./final-model.h5')
+    best_network.save(args['h5-out-file'])
 
     print('~~~~~ Done Training ~~~~~')
     print('Best result:', best_result)
@@ -196,4 +219,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
