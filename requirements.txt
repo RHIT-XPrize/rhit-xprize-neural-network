@@ -1,0 +1,7 @@
+pytest
+pylint
+keras
+numpy
+pandas
+tensorflow
+h5py

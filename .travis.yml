@@ -4,8 +4,7 @@ python:
   - "3.6"
 
 install:
-  - sudo pip install pytest
-  - sudo pip install pylint
+  - sudo pip install -r requirements.txt
 
 script:
   - pytest
