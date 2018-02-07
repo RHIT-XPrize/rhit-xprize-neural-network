@@ -20,6 +20,10 @@ class Block:
     last_id = 0
 
     @staticmethod
+    def reset_block_id():
+        Block.last_id = 0
+
+    @staticmethod
     def get_next_block_id():
         Block.last_id += 1
         return Block.last_id
@@ -164,7 +168,6 @@ class Configuration:
         return [x for b in all_blocks for x in b.list_representation()]
 
     def __str__(self):
-        # :(
         return str(list(map(str, self.get_all_blocks())))
 
     def mark_complete(self):
@@ -261,6 +264,7 @@ def randomize_block(block):
 
 
 def random_configuration(num_blocks, letters, colors):
+    Block.reset_block_id()
     blocks = [random_block(letters, colors) for i in range(num_blocks)]
     return Configuration(blocks)
 
@@ -298,21 +302,25 @@ def create_header_list(num_blocks):
 def main():
     colors = ['RED', 'GREEN', 'BLUE']
     letters = ['A', 'B', 'C']
-    num_blocks = 2
 
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
         print('Wrong number of arguments.')
-        print('Call as "python generate_instructions.py <num-to-generate> <outfile>"')
+        print('Call as "python generate_instructions.py <num-to-generate> <num-blocks> <outfile>"')
         return
 
     try:
         num_to_generate = int(sys.argv[1])
     except:
-        print('First argument must be an integer.')
+        print('Number of games must be an integer.')
         return
 
     try:
-        f = open(sys.argv[2], 'w')
+        num_blocks = int(sys.argv[2])
+    except:
+        print('Number of blocks must be an integer')
+
+    try:
+        f = open(sys.argv[3], 'w')
         csv_writer = csv.writer(f)
     except:
         print('Given path is not valid or could not be opened')
