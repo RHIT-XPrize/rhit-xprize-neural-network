@@ -9,17 +9,14 @@ def split_file(num_blocks, input_file_name, output_neural_in, output_neural_out)
                 neural_in_writer = csv.writer(csv_neural_in_file)
                 neural_out_writer = csv.writer(csv_neural_out_file)
 
+                # remove headers
                 row = reader.__next__()
-                # input_cols = row[:14] + row[17:]
-                # input_cols = row[:7 * num_blocks]
-                # output_cols = row[14:17]
-                # neural_in_writer.writerow(input_cols)
 
                 for row in reader:
                     state_cols = row[:num_blocks * 7]
                     word_col = row[-3]
                     input_cols = state_cols + [word_col]
-                    output_cols = [0 for i in range(num_blocks)]
+                    output_cols = [0] * num_blocks
                     output_cols[int(row[-6]) - 1] = 1
 
                     neural_in_writer.writerow(input_cols)
