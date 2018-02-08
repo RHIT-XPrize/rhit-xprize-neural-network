@@ -169,7 +169,7 @@ def main():
 
     data = load_data(args['neural-in-file'], args['neural-out-file'])
 
-    best_result = None
+    best_result = []
     best_network = None
     for x in range(num_iterations):
         config = NetworkConfig.random_network_config(num_blocks)
@@ -200,7 +200,7 @@ def main():
             verbose=True
         )
 
-        if best_result is None or result[1] > best_result[1]:
+        if best_result == [] or result[1] > best_result[1]:
             best_network = final_network
             best_result = result
 

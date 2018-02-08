@@ -8,5 +8,4 @@ install:
 
 script:
   - pytest
-  - pylint -E generate_instructions
-  - pylint -E generate_instructions_test
+  - pylint -E *.py
