@@ -253,8 +253,8 @@ def random_block(letters, colors):
 
 def randomize_block(block):
     def maybe_flip(b):
-        if random() < 0.5:
-            return b.flip()
+        # if random() < 0.5:
+            # return b.flip()
         return b
     def maybe_shift(b):
         if random() < 0.95:
