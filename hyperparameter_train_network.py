@@ -15,15 +15,15 @@ import tensorflow as tf
 import random
 import sys
 
-SYMBOLS = np.asarray(list('ABCDEFGHIJKLMNOPQRSTUVWXYZ .,?1234567890'))
+SYMBOLS = np.asarray(list(' ABCDEFGHIJKLMNOPQRSTUVWXYZ.,?1234567890'))
 N_SYMBOLS = len(SYMBOLS)
 TOKENS = dict((c, i) for i, c in enumerate(SYMBOLS))
 MAX_LEN = 50
 
 def tokenize_string(s):
-    ret = np.zeros((MAX_LEN, N_SYMBOLS), dtype=bool)
+    ret = np.zeros(MAX_LEN, dtype=bool)
     for i, char in enumerate(s):
-        ret[i, TOKENS[char.capitalize()]] = 1
+        ret[i] = TOKENS[char.capitalize()]
     return ret
 
 def tokenize(a):
@@ -96,11 +96,11 @@ def create_network(num_blocks, MAX_LEN, N_SYMBOLS):
     config = NetworkConfig.random_network_config(num_blocks)
 
     state_input = Input(shape=(7*num_blocks,),name='state_input')
-    words_input = Input(shape=(MAX_LEN, N_SYMBOLS), name='words_input')
-    words_lstm=LSTM(config.lstm_size)(words_input)
-    words_lstm = Dense(128, activation='relu')(words_lstm)
+    words_input = Input(shape=(MAX_LEN,), name='words_input')
+    # words_lstm=LSTM(config.lstm_size)(words_input)
+    # words_lstm = Dense(128, activation='relu')(words_lstm)
 
-    network_input = keras.layers.concatenate([words_lstm, state_input])
+    network_input = keras.layers.concatenate([words_input, state_input])
 
     main_network = BuildNet(config.both_layers, network_input)
     main_output = Dense(config.num_blocks, activation='softmax', name='main_output')(main_network)
