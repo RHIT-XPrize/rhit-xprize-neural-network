@@ -1,4 +1,1 @@
-move the %c %l block here
-%c %l here
-put the %c %l block here
-slide that %c %l block over there
+%c %l
