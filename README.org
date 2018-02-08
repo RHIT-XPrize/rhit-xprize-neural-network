@@ -4,3 +4,47 @@
 This repository hosts the neural network component of Rose-Hulman's AI
 XPrize robot. For more detailed information of the project as a whole,
 see [[https://github.com/RHIT-XPrize/rhit-xprize-pipeline][this repo]].
+
+** Instructions
+For a quick-and-dirty startup, first =pip3 install --user -r
+requirements.txt=. Then use the =build_neural_network.sh= to generate
+data, split the data, and train the neural network. Usage is described
+below.
+** Usage
+*** Generate Instructions
+=generate_instructions.py <num-games> <num-blocks> <outfile>=
+
+Generates =<num-games>= games (lines) for a .csv file,
+=<outfile>=. The games generated each have =<num-blocks>= blocks and
+games only exist for one move (i.e. this doesn't produce chains of
+moves building off of each other).
+*** Split File
+=split_file.py <num-blocks> <in-file> <neural-in-file> <neural-out-file>=
+
+Splits out the data .csv produced by =generate_instructions.py=,
+=<in-file>= into two .csv files: =<neural-in-file>=, which represents
+the inputs to the neural network, and =<neural-out-file>=, which
+represents the output for each given input. It needs to know the
+=<num-blocks>= so that it can correctly read the =<in-file>=.
+*** Hyperparameter Train Network
+=hyperparameter_train_network.py <num-blocks> <neural-in-file> <neural-out-file> <model-h5-file>=
+
+Creates and trains a new neural network using the csv data in
+=<neural-in-file>= as inputs and =<neural-out-file>= as expected
+outputs. It stores the final model in HDF5 format in the
+=<model-h5-file>=. Again, it needs to know the =<num-blocks>= to
+correctly read input.
+*** Build Neural Network
+=./build_neural_network.sh <num-games> <num-blocks> <model-h5-file> (-r)=
+
+Runs the previous three programs in succession to generate data, split
+the data appropriately, and train a new neural network from that new
+data. It will generate =<num-games>= games with =<num-blocks>= blocks
+each, and it will store the resulting model in =<model-h5-file>=.
+
+In an effort to save storage, pass the =-r= flag as /the last
+argument/ to remove the intermediate files (=<in-file>=,
+=<neural-in-file>=, and =<neural-out-file>=) as soon as possible. This
+is a bad idea if you would rather keep the same data for future
+training runs. If the =-r= flag is not passed, no intermediary files
+will be removed.
