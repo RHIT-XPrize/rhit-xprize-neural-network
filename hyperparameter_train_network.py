@@ -68,6 +68,7 @@ class NetworkConfig:
     MAX_POINT_LAYERS = 5
     MAX_BOTH_LAYERS = 5
     NETWORK_SIZES = [16, 32, 64, 128, 254, 512]
+
     def __init__(self, num_blocks, lstm_size, block_layers, point_layers, both_layers):
         self.lstm_size = lstm_size
         self.block_layers = block_layers
@@ -95,7 +96,7 @@ def create_network(num_blocks, MAX_LEN, N_SYMBOLS):
     config = NetworkConfig.random_network_config(num_blocks)
 
     state_input = Input(shape=(7*num_blocks,),name='state_input')
-    words_input = Input(shape=(MAX_LEN,N_SYMBOLS), name='words_input')
+    words_input = Input(shape=(MAX_LEN, N_SYMBOLS), name='words_input')
     words_lstm=LSTM(config.lstm_size)(words_input)
     words_lstm = Dense(128, activation='relu')(words_lstm)
 
@@ -117,15 +118,16 @@ def load_data(neural_in, neural_out):
     num_samples_training = int(num_samples * 0.25)
 
     train_words_in = df_in.iloc[:num_samples_training,-1].values
-
     train_words_in = tokenize(train_words_in)
-    train_state_in = df_in.iloc[:num_samples_training,:-1]
-    train_state_in = encode_states(train_state_in.values)
+
+    train_state_in = df_in.iloc[:num_samples_training,:-1].values
+    train_state_in = encode_states(train_state_in)
 
     test_words_in = df_in.iloc[num_samples_training:,-1].values
-    test_words_in = tokenize(test_words_in);
-    test_state_in = df_in.iloc[num_samples_training:,:-1]
-    test_state_in = encode_states(test_state_in.values)
+    test_words_in = tokenize(test_words_in)
+
+    test_state_in = df_in.iloc[num_samples_training:,:-1].values
+    test_state_in = encode_states(test_state_in)
 
     train_main_out = df_out.iloc[:num_samples_training,]
     test_main_out = df_out.iloc[num_samples_training:,]
@@ -172,7 +174,6 @@ def main():
     best_result = []
     best_network = None
     for x in range(num_iterations):
-        config = NetworkConfig.random_network_config(num_blocks)
         final_network = create_network(num_blocks, MAX_LEN, N_SYMBOLS)
         final_network.compile(
             loss='mean_squared_error',
@@ -180,7 +181,7 @@ def main():
             metrics=['accuracy']
         )
 
-        history = final_network.fit({
+        final_network.fit({
             'state_input': data['train_state_in'],
             'words_input': data['train_words_in']
         }, {
@@ -210,11 +211,16 @@ def main():
     print('Best result:', best_result)
 
     print('Spot test:')
-    print(np.array(data['train_main_out'][:10]))
-    print(best_network.predict({
+
+    correct = np.array(data['train_main_out'][:10])
+    predicted = best_network.predict({
         'state_input': data['train_state_in'][:10],
         'words_input': data['train_words_in'][:10]
-    }))
+    })
+
+    print(correct)
+    print(predicted)
+    print(correct - predicted)
 
 
 if __name__ == '__main__':
