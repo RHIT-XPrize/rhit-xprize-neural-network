@@ -327,12 +327,14 @@ def main():
         return
 
     csv_writer.writerow(create_header_list(num_blocks))
+    rand_conf = random_configuration(num_blocks, letters, colors)
     for _ in range(num_to_generate):
-        start = random_configuration(num_blocks, letters, colors)
+        start = Configuration(rand_conf.current_blocks, rand_conf.final_blocks)
         end = start.scatter().mark_complete()
         moves = solve_board(start, end)
         for line_repr in map(lambda x: x.list_representation(), moves):
             csv_writer.writerow(line_repr)
+            break
 
     f.close()
 
