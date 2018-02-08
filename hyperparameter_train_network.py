@@ -15,7 +15,7 @@ import tensorflow as tf
 import random
 import sys
 
-SYMBOLS = np.asarray(list('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz .,1234567890'))
+SYMBOLS = np.asarray(list('ABCDEFGHIJKLMNOPQRSTUVWXYZ .,?1234567890'))
 N_SYMBOLS = len(SYMBOLS)
 TOKENS = dict((c, i) for i, c in enumerate(SYMBOLS))
 MAX_LEN = 50
@@ -23,7 +23,7 @@ MAX_LEN = 50
 def tokenize_string(s):
     ret = np.zeros((MAX_LEN, N_SYMBOLS), dtype=bool)
     for i, char in enumerate(s):
-        ret[i, TOKENS[char]] = 1
+        ret[i, TOKENS[char.capitalize()]] = 1
     return ret
 
 def tokenize(a):
