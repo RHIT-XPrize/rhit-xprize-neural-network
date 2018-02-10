@@ -63,7 +63,7 @@ def build_list(num_to_generate, colors, letters):
         letter_ind = random.randint(0, len(letters) - 1)
         rand_letter = letters[letter_ind]
 
-        text_list += [[template_func(rand_color, rand_letter)]]
+        text_list += [[template_func(rand_color, rand_letter).upper()]]
 
         soln['color-ind'] = color_ind
         soln['letter-ind'] = letter_ind
