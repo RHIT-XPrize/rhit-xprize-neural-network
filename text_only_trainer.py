@@ -14,6 +14,12 @@ import tensorflow as tf
 import operator
 import sys
 
+
+if len(sys.argv) > 1:
+    model_file = sys.argv[1]
+else:
+    model_file = 'textOnly.h5'
+
 # # Load in Data
 df_in = pd.read_csv('text-in.csv', header=None, names=['Text'])
 
@@ -78,7 +84,7 @@ for _ in range(10):
               verbose=True,
               validation_split=0.20)
 
-    model.save_weights('textOnly.h5')
+    model.save_weights(model_file)
 
 
 # # Manual Testing
