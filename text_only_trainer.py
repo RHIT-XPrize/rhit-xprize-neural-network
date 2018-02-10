@@ -91,8 +91,8 @@ for _ in range(10):
 def get_result_components(result_arr):
     return {
         'flip': result_arr[0],
-        'colors': result_arr[1:len(colors) + 1],
-        'letters': result_arr[len(colors) + 1:]
+        'colors': result_arr[1:len(all_colors) + 1],
+        'letters': result_arr[len(all_colors) + 1:]
     }
 
 
