@@ -20,21 +20,23 @@ def main():
     soln_list = expand_soln_list(soln_list, len(colors), len(letters))
 
     write_csv(args['neural-infile'], text_list)
-    write_csv(args['neural-outfile'], soln_list)
+    write_csv(args['neural-flip-outfile'], soln_list)
 
 def get_args():
     try:
-        assert len(sys.argv) == 4
+        assert len(sys.argv) == 6
 
         args = {}
 
         args['num-to-generate'] = int(sys.argv[1])
         args['neural-infile'] = sys.argv[2]
-        args['neural-outfile'] = sys.argv[3]
+        args['neural-flip-outfile'] = sys.argv[3]
+        args['neural-color-outfile'] = sys.argv[3]
+        args['neural-letter-outfile'] = sys.argv[3]
 
         return args
     except:
-        print('Call as "python generate_text_instructions.py <num-to-generate> <neural-infile> <neural-outfile>"')
+        print('Call as "python generate_text_instructions.py <num-to-generate> <neural-infile> <neural-flip-outfile> <neural-color-outfile> <neural-letter-outfile>"')
 
 def load_colors():
     with open('colors.txt') as colors_file:
