@@ -61,8 +61,8 @@ train_out = df_out.iloc[:training_entries, :].values
 # This model makeup (as well as the notable usage of `Tokenize`) comes from [here](https://machinelearningmastery.com/develop-word-based-neural-language-models-python-keras/).
 
 model = Sequential()
-if len(sys.argv) > 1:
-    model.load_weights(sys.argv[1])
+if len(sys.argv) > 2:
+    model.load_weights(sys.argv[2])
 else:
     model.add(Embedding(VOCAB_SIZE, 10, input_length=50))
     model.add(LSTM(50))
