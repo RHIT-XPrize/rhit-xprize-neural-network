@@ -92,11 +92,11 @@ class Block:
 
 def create_move_instruction(block):
     point = block.position
-    phrase = tr.read_move_template(block.side1_color, block.side1_letter)
+    phrase = tr.read_move_template(block.side1_color, block.side1_letter)['text']
     return Instruction(phrase, point)
 
 def create_flip_instruction(block):
-    phrase = tr.read_flip_template(block.side1_color, block.side1_letter)
+    phrase = tr.read_flip_template(block.side1_color, block.side1_letter)['text']
     return Instruction(phrase, block.position)
 
 class Instruction:
