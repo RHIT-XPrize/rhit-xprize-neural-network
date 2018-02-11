@@ -21,7 +21,7 @@ def main():
 
     core.compile_model(model)
 
-    core.train_model(model, text, flipped, args['model-output'])
+    core.train_model(model, text, flipped, args['model-output'], 1)
 
 def get_args():
     try:
