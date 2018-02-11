@@ -12,19 +12,29 @@ data, split the data, and train the neural network. Usage is described
 below.
 ** Usage
 *** Generate Text Instructions
-=generate_text_instructions.py <num-to-generate> <neural-infile> <neural-outfile>=
+=generate_text_instructions.py <num-to-generate> <neural-infile> <neural-flips-outfile> <neural-colors-outfile> <neural-letters-outfile>=
 
 Generates =<num-to-generate>= sample instructions and meanings to the
-two .csv files =<neural-infile>= and
-=<neural-outfile>=. =<neural-infile>= holds the raw text (in all caps
-to reduce the search space), and =<neural-outfile>= holds boolean
-matrix of the form:
+four .csv files =<neural-infile>=, =<neural-flips-outfile>=,
+=<neural-colors-outfile>=, and
+=<neural-letters-outfile>=.
 
-| Flip? | Red | Green | Blue | Orange | Yellow | A | B | C | D | E | F | G | H |
-|-------+-----+-------+------+--------+--------+---+---+---+---+---+---+---+---|
+- =<neural-infile>= holds the raw text (in all caps to reduce the search space)
+- =<neural-flips-outfile>= holds a list of 1's and 0's signifying
+  whether that instruction was to flip or not
+- =<neural-colors-outfile>= holds a boolean matrix of colors:
 
-This signifies the desired meaning of the text output. Currently, each
-output entry will have both a color and a letter.
+| Red | Green | Blue | Orange | Yellow |
+|-----+-------+------+--------+--------|
+
+- =<neural-letters-outfile>= holds a similar boolean matrix of letters:
+
+| A | B | C | D | E | F | G | H |
+|---+---+---+---+---+---+---+---|
+
+These each signify the desired meaning of the corresponding line of
+text. Currently, each output entry will have both a color and a
+letter.
 *** Text-Only Trainer
 =text_only_trainer.py <neural-in-file> <neural-out-file> (<model-output-file> (<model-input-file>))=
 

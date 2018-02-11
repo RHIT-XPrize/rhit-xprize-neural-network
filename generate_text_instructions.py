@@ -20,7 +20,7 @@ def main():
     data = expand_data(data, len(colors), len(letters))
 
     write_csv(args['neural-infile'], data['text'])
-    write_csv(args['neural-flip-outfile'], data['flipped'])
+    write_csv(args['neural-flips-outfile'], data['flipped'])
     write_csv(args['neural-color-outfile'], data['colors'])
     write_csv(args['neural-letter-outfile'], data['letters'])
 
@@ -32,13 +32,13 @@ def get_args():
 
         args['num-to-generate'] = int(sys.argv[1])
         args['neural-infile'] = sys.argv[2]
-        args['neural-flip-outfile'] = sys.argv[3]
+        args['neural-flips-outfile'] = sys.argv[3]
         args['neural-color-outfile'] = sys.argv[4]
         args['neural-letter-outfile'] = sys.argv[5]
 
         return args
     except:
-        print('Call as "python generate_text_instructions.py <num-to-generate> <neural-infile> <neural-flip-outfile> <neural-color-outfile> <neural-letter-outfile>"')
+        print('Call as "python generate_text_instructions.py <num-to-generate> <neural-infile> <neural-flips-outfile> <neural-color-outfile> <neural-letter-outfile>"')
 
 def load_colors():
     with open('colors.txt') as colors_file:
