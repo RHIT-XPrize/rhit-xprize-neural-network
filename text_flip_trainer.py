@@ -19,7 +19,7 @@ def main():
     if 'model-input' in args:
         model.load_weights(args['model-input'])
 
-    core.compile_model(model, True)
+    core.compile_model(model, 'cosine_proximity')
 
     core.train_model(model, text, flipped, args['model-output'])
 

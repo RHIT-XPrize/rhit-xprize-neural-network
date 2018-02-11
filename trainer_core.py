@@ -56,8 +56,7 @@ def build_model(vocab_size, output_size):
 
     return model
 
-def compile_model(model, mse=False):
-    loss = 'binary_crossentropy' if mse else 'categorical_crossentropy'
+def compile_model(model, loss='categorical_crossentropy'):
     model.compile(loss=loss,
                   optimizer='adam',
                   metrics=['accuracy'])
