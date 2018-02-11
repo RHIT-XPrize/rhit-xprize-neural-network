@@ -47,13 +47,13 @@ def load_models(args):
     vocab = core.load_vocabulary()
     vocab_size = len(vocab) + 1
 
-    flip_model = core.build_model(vocab_size, 1)
+    flip_model = core.build_model(vocab_size, 2)
     flip_model.load_weights(args['flips'])
 
-    colors_model = core.build_model(vocab_size, len(colors))
+    colors_model = core.build_model(vocab_size, len(colors) + 1)
     colors_model.load_weights(args['colors'])
 
-    letters_model = core.build_model(vocab_size, len(letters))
+    letters_model = core.build_model(vocab_size, len(letters) + 1)
     letters_model.load_weights(args['letters'])
 
     return (flip_model, colors_model, letters_model)
