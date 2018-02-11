@@ -52,6 +52,7 @@ def build_model(vocab_size, output_size):
     model = Sequential()
     model.add(Embedding(vocab_size, 10, input_length=INPUT_TEXT_LENGTH))
     model.add(LSTM(INPUT_TEXT_LENGTH))
+    model.add(Dropout(0.10))
     model.add(Dense(output_size, activation='softmax'))
 
     return model
@@ -62,12 +63,15 @@ def compile_model(model, loss='categorical_crossentropy'):
                   metrics=['accuracy'])
 
 def train_model(model, text, output, model_file, iterations=10):
+    early_stopping = keras.callbacks.EarlyStopping(monitor='acc', mode='auto')
+
     for _ in range(iterations):
         model.fit(text,
                   output,
                   epochs=10,
                   batch_size=50,
                   verbose=True,
-                  validation_split=0.20)
+                  validation_split=0.20,
+                  callbacks=[early_stopping])
 
         model.save_weights(model_file)
