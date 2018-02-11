@@ -64,13 +64,12 @@ def build_data(num_to_generate, colors, letters):
             template_func = reader.read_move_template
             data['flipped'] += [False]
 
-        color_ind = random.randint(0, len(colors) - 1)
-        rand_color = colors[color_ind]
+        (color_ind, rand_color, other_color) = random_elements(colors)
 
-        letter_ind = random.randint(0, len(letters) - 1)
-        rand_letter = letters[letter_ind]
+        (letter_ind, rand_letter, other_letter) = random_elements(letters)
 
-        template_result = template_func(rand_color, rand_letter)
+        template_result = template_func(rand_color, rand_letter,
+                                        other_color, other_letter)
         data['text'] += [[template_result['text'].upper()]]
 
         if template_result['color']:
@@ -84,6 +83,20 @@ def build_data(num_to_generate, colors, letters):
             data['letters'] += [0]
 
     return data
+
+def random_elements(elements):
+    rand_index = random.randint(0, len(elements) - 1)
+    rand_element = elements[rand_index]
+
+    # Pick a different one, but don't get stuck
+    for _ in range(10):
+        other_element = random.choice(elements)
+        if other_element != rand_element:
+            break
+        else:
+            other_element = None
+
+    return (rand_index, rand_element, other_element)
 
 def should_flip():
     return random.random() < FLIP_PERCENTAGE
