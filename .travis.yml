@@ -7,5 +7,4 @@ install:
   - sudo pip install -r requirements.txt
 
 script:
-  - pytest
   - pylint -E *.py
