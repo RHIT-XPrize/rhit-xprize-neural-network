@@ -71,3 +71,23 @@ def train_model(model, text, output, model_file, iterations=10):
                   validation_split=0.20)
 
         model.save_weights(model_file)
+
+def run_model(model, text, tokenizer):
+    tokenized = tokenizer.texts_to_sequences([text])
+    padded = np.append(tokenized[0], np.zeros(INPUT_TEXT_LENGTH - len(tokenized[0])))
+    padded = np.array(padded, ndmin=2)
+
+    return model.predict(padded)[0]
+
+def translate_colors(color_cat):
+    colors = load_colors()
+    max_index, max_val = max_entry(color_cat)
+    return (colors[max_index], max_val)
+
+def translate_letters(letter_cat):
+    letters = load_letters()
+    max_index, max_val = max_entry(letter_cat)
+    return (letters[max_index], max_val)
+
+def max_entry(categorization):
+    return max(enumerate(categorization), key=operator.itemgetter(1))
