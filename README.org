@@ -11,14 +11,37 @@ requirements.txt=. Then use the =build_neural_network.sh= to generate
 data, split the data, and train the neural network. Usage is described
 below.
 ** Usage
-*** Generate Instructions
+*** Generate Text Instructions
+=generate_text_instructions.py <num-to-generate> <neural-infile> <neural-outfile>=
+
+Generates =<num-to-generate>= sample instructions and meanings to the
+two .csv files =<neural-infile>= and
+=<neural-outfile>=. =<neural-infile>= holds the raw text (in all caps
+to reduce the search space), and =<neural-outfile>= holds boolean
+matrix of the form:
+
+| Flip? | Red | Green | Blue | Orange | Yellow | A | B | C | D | E | F | G | H |
+|-------+-----+-------+------+--------+--------+---+---+---+---+---+---+---+---|
+
+This signifies the desired meaning of the text output. Currently, each
+output entry will have both a color and a letter.
+*** Text-Only Trainer
+=text_only_trainer.py <neural-in-file> <neural-out-file> (<model-output-file> (<model-input-file>))=
+
+Creates and trains a new neural network using the .csv data in
+=<neural-in-file>= as inputs and =<neural-out-file>= as expected
+outputs. It stores the final model in HDF5 format in the
+=<model-output-file>= or else =textOnly.h5=. If =<model-input-file>=
+is provided, instead of creating a new neural network, it will load
+the provided one and continue training it.
+*** [Deprecated] Generate Instructions
 =generate_instructions.py <num-games> <num-blocks> <outfile>=
 
 Generates =<num-games>= games (lines) for a .csv file,
 =<outfile>=. The games generated each have =<num-blocks>= blocks and
 games only exist for one move (i.e. this doesn't produce chains of
 moves building off of each other).
-*** Split File
+*** [Deprecated] Split File
 =split_file.py <num-blocks> <in-file> <neural-in-file> <neural-out-file>=
 
 Splits out the data .csv produced by =generate_instructions.py=,
@@ -26,7 +49,7 @@ Splits out the data .csv produced by =generate_instructions.py=,
 the inputs to the neural network, and =<neural-out-file>=, which
 represents the output for each given input. It needs to know the
 =<num-blocks>= so that it can correctly read the =<in-file>=.
-*** Hyperparameter Train Network
+*** [Deprecated] Hyperparameter Train Network
 =hyperparameter_train_network.py <num-blocks> <neural-in-file> <neural-out-file> <model-h5-file>=
 
 Creates and trains a new neural network using the csv data in
@@ -34,7 +57,7 @@ Creates and trains a new neural network using the csv data in
 outputs. It stores the final model in HDF5 format in the
 =<model-h5-file>=. Again, it needs to know the =<num-blocks>= to
 correctly read input.
-*** Build Neural Network
+*** [Deprecated] Build Neural Network
 =./build_neural_network.sh <num-games> <num-blocks> <model-h5-file> (-r)=
 
 Runs the previous three programs in succession to generate data, split
