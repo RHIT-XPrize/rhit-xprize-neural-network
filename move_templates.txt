@@ -1,9 +1,15 @@
-move the %c %l block here
+here
+%c
+%l
 %c %l here
+move the %c %l here
+move the %c %l block here
 put the %c %l block here
 slide that %c %l block over there
-move the %c block
-move the %l here
+put the %c %l next to the %C %L
 move the %c block next to the %C one
 move the %l next to the %C block
-put the %c %l next to the %C %L
+slide the %c block here
+move the %c one
+move the %c block
+move the %l here
