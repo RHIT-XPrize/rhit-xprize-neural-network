@@ -70,10 +70,18 @@ def build_data(num_to_generate, colors, letters):
         letter_ind = random.randint(0, len(letters) - 1)
         rand_letter = letters[letter_ind]
 
-        data['text'] += [[template_func(rand_color, rand_letter).upper()]]
+        template_result = template_func(rand_color, rand_letter)
+        data['text'] += [[template_result['text'].upper()]]
 
-        data['colors'] += [color_ind]
-        data['letters'] += [letter_ind]
+        if template_result['color']:
+            data['colors'] += [color_ind]
+        else:
+            data['colors'] += [0]
+
+        if template_result['letter']:
+            data['letters'] += [letter_ind]
+        else:
+            data['letters'] += [0]
 
     return data
 

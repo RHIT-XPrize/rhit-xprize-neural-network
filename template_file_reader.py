@@ -14,6 +14,12 @@ def read_move_template(color, letter):
 
 def _read_template(templates, color, letter):
     rand_template = random.choice(templates)
-    return rand_template.replace('%c', color)  \
-                        .replace('%l', letter) \
-                        .replace('\n', '')
+
+    result = {}
+
+    result['color'] = '%c' in rand_template
+    result['letter'] = '%l' in rand_template
+    result['text'] = rand_template.replace('%c', color)  \
+                                  .replace('%l', letter) \
+                                  .replace('\n', '')
+    return result
