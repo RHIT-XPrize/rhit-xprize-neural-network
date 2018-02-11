@@ -4,3 +4,4 @@ put the %c %l block here
 slide that %c %l block over there
 move the %c block
 move the %l here
+move the %c block next to the %C one
