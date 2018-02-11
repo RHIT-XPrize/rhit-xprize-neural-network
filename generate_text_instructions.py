@@ -75,12 +75,12 @@ def build_data(num_to_generate, colors, letters):
         if template_result['color']:
             data['colors'] += [color_ind]
         else:
-            data['colors'] += [-1]
+            data['colors'] += [len(colors)]
 
         if template_result['letter']:
             data['letters'] += [letter_ind]
         else:
-            data['letters'] += [-1]
+            data['letters'] += [len(letters)]
 
     return data
 
@@ -111,13 +111,16 @@ def write_csv(filename, data_list):
 def expand_data(data, num_colors, num_letters):
     def expand_flipped(flipped):
         for row_index, flipped_entry in enumerate(flipped):
-            flipped[row_index] = [1 if flipped_entry else 0]
+            if flipped_entry:
+                flipped[row_index] = [1, 0]
+            else:
+                flipped[row_index] = [0, 1]
 
         return flipped
 
     def expand_colors(colors):
         for row_index, color_index in enumerate(colors):
-            colors_out = [0] * num_colors
+            colors_out = [0] * (num_colors + 1)
 
             if color_index >= 0:
                 colors_out[color_index] = 1
@@ -127,7 +130,7 @@ def expand_data(data, num_colors, num_letters):
 
     def expand_letters(letters):
         for row_index, letter_index in enumerate(letters):
-            letters_out = [0] * num_letters
+            letters_out = [0] * (num_letters + 1)
 
             if letter_index >= 0:
                 letters_out[letter_index] = 1

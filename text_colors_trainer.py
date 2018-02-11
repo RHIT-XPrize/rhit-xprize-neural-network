@@ -16,7 +16,7 @@ def main():
     text = core.load_text(args['text-file'], tokenizer)
     flipped = core.load_output(args['colors-file'])
 
-    model = core.build_model(vocabulary_size, len(colors))
+    model = core.build_model(vocabulary_size, len(colors) + 1)
     if 'model-input' in args:
         model.load_weights(args['model-input'])
 

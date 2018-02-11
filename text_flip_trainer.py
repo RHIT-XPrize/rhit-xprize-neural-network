@@ -15,11 +15,11 @@ def main():
     text = core.load_text(args['text-file'], tokenizer)
     flipped = core.load_output(args['flip-file'])
 
-    model = core.build_model(vocabulary_size, 1)
+    model = core.build_model(vocabulary_size, 2)
     if 'model-input' in args:
         model.load_weights(args['model-input'])
 
-    core.compile_model(model, 'cosine_proximity')
+    core.compile_model(model)
 
     core.train_model(model, text, flipped, args['model-output'])
 
