@@ -18,9 +18,13 @@ def main():
         if len(text) > 50:
             text = text[:50]
 
-        print(str(run_model(flip_model, text, tokenizer)))
-        print(str(run_model(colors_model, text, tokenizer)))
-        print(str(run_model(letters_model, text, tokenizer)))
+        flipped = run_model(flip_model, text, tokenizer)
+        color = run_model(colors_model, text, tokenizer)
+        letter = run_model(letters_model, text, tokenizer)
+
+        print(str(flipped))
+        print(str(translate_colors(color)))
+        print(str(translate_letters(letter)))
 
 def get_args():
     args = {}
