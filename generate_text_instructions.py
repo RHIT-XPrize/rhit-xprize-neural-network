@@ -75,12 +75,12 @@ def build_data(num_to_generate, colors, letters):
         if template_result['color']:
             data['colors'] += [color_ind]
         else:
-            data['colors'] += [0]
+            data['colors'] += [-1]
 
         if template_result['letter']:
             data['letters'] += [letter_ind]
         else:
-            data['letters'] += [0]
+            data['letters'] += [-1]
 
     return data
 
@@ -118,7 +118,9 @@ def expand_data(data, num_colors, num_letters):
     def expand_colors(colors):
         for row_index, color_index in enumerate(colors):
             colors_out = [0] * num_colors
-            colors_out[color_index] = 1
+
+            if color_index >= 0:
+                colors_out[color_index] = 1
             colors[row_index] = colors_out
 
         return colors
@@ -127,7 +129,8 @@ def expand_data(data, num_colors, num_letters):
         for row_index, letter_index in enumerate(letters):
             letters_out = [0] * num_letters
 
-            letters_out[letter_index] = 1
+            if letter_index >= 0:
+                letters_out[letter_index] = 1
             letters[row_index] = letters_out
 
         return letters
