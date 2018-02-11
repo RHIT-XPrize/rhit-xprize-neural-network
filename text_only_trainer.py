@@ -14,21 +14,25 @@ import tensorflow as tf
 import operator
 import sys
 
+if len(sys.argv) < 3:
+    print('Usage: text_only_trainer.py <neural-in-file> <neural-out-file> (<model-output-file> (<model-input-file>))')
+    sys.exit()
 
-if len(sys.argv) > 1:
-    model_file = sys.argv[1]
+neural_in_file = sys.argv[1]
+neural_out_file = sys.argv[2]
+
+if len(sys.argv) > 3:
+    model_file = sys.argv[3]
 else:
     model_file = 'textOnly.h5'
 
 # # Load in Data
-df_in = pd.read_csv('text-in.csv', header=None, names=['Text'])
+df_in = pd.read_csv(neural_in_file, header=None, names=['Text'])
 
 all_colors = ['Red', 'Green', 'Blue', 'Orange', 'Yellow']
 all_letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
-df_out = pd.read_csv('text-out.csv',
-                     header=None,
-                     names=(['Flip?'] + all_colors + all_letters))
+df_out = pd.read_csv(neural_out_file, header=None, names=(['Flip?'] + all_colors + all_letters))
 
 # # Split and Format Data
 
@@ -61,8 +65,8 @@ train_out = df_out.iloc[:training_entries, :].values
 # This model makeup (as well as the notable usage of `Tokenize`) comes from [here](https://machinelearningmastery.com/develop-word-based-neural-language-models-python-keras/).
 
 model = Sequential()
-if len(sys.argv) > 2:
-    model.load_weights(sys.argv[2])
+if len(sys.argv) > 4:
+    model.load_weights(sys.argv[4])
 else:
     model.add(Embedding(VOCAB_SIZE, 10, input_length=50))
     model.add(LSTM(50))
