@@ -15,12 +15,14 @@ def main():
     colors = load_colors()
     letters = load_letters()
 
-    (text_list, soln_list) = build_list(args['num-to-generate'], colors, letters)
+    data = build_data(args['num-to-generate'], colors, letters)
 
-    soln_list = expand_soln_list(soln_list, len(colors), len(letters))
+    data = expand_data(data, len(colors), len(letters))
 
-    write_csv(args['neural-infile'], text_list)
-    write_csv(args['neural-flip-outfile'], soln_list)
+    write_csv(args['neural-infile'], data['text'])
+    write_csv(args['neural-flip-outfile'], data['flipped'])
+    write_csv(args['neural-color-outfile'], data['colors'])
+    write_csv(args['neural-letter-outfile'], data['letters'])
 
 def get_args():
     try:
@@ -31,8 +33,8 @@ def get_args():
         args['num-to-generate'] = int(sys.argv[1])
         args['neural-infile'] = sys.argv[2]
         args['neural-flip-outfile'] = sys.argv[3]
-        args['neural-color-outfile'] = sys.argv[3]
-        args['neural-letter-outfile'] = sys.argv[3]
+        args['neural-color-outfile'] = sys.argv[4]
+        args['neural-letter-outfile'] = sys.argv[5]
 
         return args
     except:
@@ -46,18 +48,21 @@ def load_letters():
     letter_nums = list(range(ord('A'), ord('H') + 1))
     return list(map(lambda i: chr(i), letter_nums))
 
-def build_list(num_to_generate, colors, letters):
-    text_list = []
-    soln_list = []
+def build_data(num_to_generate, colors, letters):
+    data = {
+        'text': [],
+        'flipped': [],
+        'colors': [],
+        'letters': []
+    }
 
     for _ in range(num_to_generate):
-        soln = {}
         if should_flip():
             template_func = reader.read_flip_template
-            soln['flipped'] = True
+            data['flipped'] += [True]
         else:
             template_func = reader.read_move_template
-            soln['flipped'] = False
+            data['flipped'] += [False]
 
         color_ind = random.randint(0, len(colors) - 1)
         rand_color = colors[color_ind]
@@ -65,14 +70,12 @@ def build_list(num_to_generate, colors, letters):
         letter_ind = random.randint(0, len(letters) - 1)
         rand_letter = letters[letter_ind]
 
-        text_list += [[template_func(rand_color, rand_letter).upper()]]
+        data['text'] += [[template_func(rand_color, rand_letter).upper()]]
 
-        soln['color-ind'] = color_ind
-        soln['letter-ind'] = letter_ind
+        data['colors'] += [color_ind]
+        data['letters'] += [letter_ind]
 
-        soln_list += [soln]
-
-    return (text_list, soln_list)
+    return data
 
 def should_flip():
     return random.random() < FLIP_PERCENTAGE
@@ -84,18 +87,36 @@ def write_csv(filename, data_list):
         for data in data_list:
             csv_writer.writerow(data)
 
-def expand_soln_list(soln_list, num_colors, num_letters):
-    def expand_soln(soln):
-        colors_out = [0] * num_colors
-        letters_out = [0] * num_letters
+def expand_data(data, num_colors, num_letters):
+    def expand_flipped(flipped):
+        for row_index, flipped_entry in enumerate(flipped):
+            flipped[row_index] = [1 if flipped_entry else 0]
 
-        colors_out[soln['color-ind']] = 1
-        letters_out[soln['letter-ind']] = 1
-        flipped = [1 if soln['flipped'] else 0]
+        return flipped
 
-        return flipped + colors_out + letters_out
+    def expand_colors(colors):
+        for row_index, color_index in enumerate(colors):
+            colors_out = [0] * num_colors
+            colors_out[color_index] = 1
+            colors[row_index] = colors_out
 
-    return list(map(expand_soln, soln_list))
+        return colors
+
+    def expand_letters(letters):
+        for row_index, letter_index in enumerate(letters):
+            letters_out = [0] * num_letters
+
+            letters_out[letter_index] = 1
+            letters[row_index] = letters_out
+
+        return letters
+
+    return {
+        'text': data['text'],
+        'flipped': expand_flipped(data['flipped']),
+        'colors': expand_colors(data['colors']),
+        'letters': expand_letters(data['letters'])
+    }
 
 if __name__ == '__main__':
     main()
