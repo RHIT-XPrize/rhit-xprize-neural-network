@@ -65,13 +65,18 @@ def run_model(model, text, tokenizer):
 
     return model.predict(padded)[0]
 
+def translate_flip(flip_cat):
+    flips = ['Flip', 'Move']
+    max_index, max_val = max_entry(flip_cat)
+    return (flips[max_index], max_val)
+
 def translate_colors(color_cat):
-    colors = core.load_colors()
+    colors = core.load_colors() + ['None']
     max_index, max_val = max_entry(color_cat)
     return (colors[max_index], max_val)
 
 def translate_letters(letter_cat):
-    letters = core.load_letters()
+    letters = core.load_letters() + ['None']
     max_index, max_val = max_entry(letter_cat)
     return (letters[max_index], max_val)
 
