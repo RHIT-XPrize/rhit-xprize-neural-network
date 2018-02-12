@@ -22,7 +22,10 @@ def load_models(args):
     return (flip_model, colors_model, letters_model)
 
 def run_model(model, text, tokenizer):
-    tokenized = tokenizer.texts_to_sequences([text])
+    if len(text) > 50:
+        text = text[:50]
+
+    tokenized = tokenizer.texts_to_sequences([text.upper()])
     padded = np.append(tokenized[0], np.zeros(core.INPUT_TEXT_LENGTH - len(tokenized[0])))
     padded = np.array(padded, ndmin=2)
 

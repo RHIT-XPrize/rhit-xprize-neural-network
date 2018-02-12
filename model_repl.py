@@ -14,10 +14,7 @@ def main():
     tokenizer = core.build_tokenizer(core.load_vocabulary())
 
     while True:
-        text = input('> ').upper()
-        if len(text) > 50:
-            text = text[:50]
-
+        text = input('> ')
         flipped = runner.run_model(flip_model, text, tokenizer)
         color = runner.run_model(colors_model, text, tokenizer)
         letter = runner.run_model(letters_model, text, tokenizer)
