@@ -89,7 +89,8 @@ def random_elements(elements):
     rand_element = elements[rand_index]
 
     # Pick a different one, but don't get stuck
-    for _ in range(10):
+    RETRIES = 10
+    for _ in range(RETRIES):
         other_element = random.choice(elements)
         if other_element != rand_element:
             break
