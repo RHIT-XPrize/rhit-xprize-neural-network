@@ -59,10 +59,10 @@ def build_data(num_to_generate, colors, letters):
     for _ in range(num_to_generate):
         if should_flip():
             template_func = reader.read_flip_template
-            data['flipped'] += [True]
+            data['flipped'].append(True)
         else:
             template_func = reader.read_move_template
-            data['flipped'] += [False]
+            data['flipped'].append(False)
 
         (color_ind, rand_color, other_color) = random_elements(colors)
 
@@ -70,17 +70,17 @@ def build_data(num_to_generate, colors, letters):
 
         template_result = template_func(rand_color, rand_letter,
                                         other_color, other_letter)
-        data['text'] += [[template_result['text'].upper()]]
+        data['text'].append([template_result['text'].upper()])
 
         if template_result['color']:
-            data['colors'] += [color_ind]
+            data['colors'].append(color_ind)
         else:
-            data['colors'] += [len(colors)]
+            data['colors'].append(len(colors))
 
         if template_result['letter']:
-            data['letters'] += [letter_ind]
+            data['letters'].append(letter_ind)
         else:
-            data['letters'] += [len(letters)]
+            data['letters'].append(len(letters))
 
     return data
 
