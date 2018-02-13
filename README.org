@@ -11,40 +11,69 @@ requirements.txt=. Then use the =build_neural_network.sh= to generate
 data, split the data, and train the neural network. Usage is described
 below.
 ** Usage
-*** Generate Instructions
-=generate_instructions.py <num-games> <num-blocks> <outfile>=
+*** Generate Text Instructions
+=generate_text_instructions.py <num-to-generate> <neural-infile> <neural-flips-outfile> <neural-colors-outfile> <neural-letters-outfile>=
 
-Generates =<num-games>= games (lines) for a .csv file,
-=<outfile>=. The games generated each have =<num-blocks>= blocks and
-games only exist for one move (i.e. this doesn't produce chains of
-moves building off of each other).
-*** Split File
-=split_file.py <num-blocks> <in-file> <neural-in-file> <neural-out-file>=
+Generates =<num-to-generate>= sample instructions and meanings to the
+four .csv files =<neural-infile>=, =<neural-flips-outfile>=,
+=<neural-colors-outfile>=, and
+=<neural-letters-outfile>=.
 
-Splits out the data .csv produced by =generate_instructions.py=,
-=<in-file>= into two .csv files: =<neural-in-file>=, which represents
-the inputs to the neural network, and =<neural-out-file>=, which
-represents the output for each given input. It needs to know the
-=<num-blocks>= so that it can correctly read the =<in-file>=.
-*** Hyperparameter Train Network
-=hyperparameter_train_network.py <num-blocks> <neural-in-file> <neural-out-file> <model-h5-file>=
+- =<neural-infile>= holds the raw text (in all caps to reduce the search space)
+- =<neural-flips-outfile>= holds a boolean matrix of instruction types:
+| Flip | Move |
+|------+------|
 
-Creates and trains a new neural network using the csv data in
-=<neural-in-file>= as inputs and =<neural-out-file>= as expected
-outputs. It stores the final model in HDF5 format in the
-=<model-h5-file>=. Again, it needs to know the =<num-blocks>= to
-correctly read input.
-*** Build Neural Network
-=./build_neural_network.sh <num-games> <num-blocks> <model-h5-file> (-r)=
+- =<neural-colors-outfile>= holds a boolean matrix of colors:
 
-Runs the previous three programs in succession to generate data, split
-the data appropriately, and train a new neural network from that new
-data. It will generate =<num-games>= games with =<num-blocks>= blocks
-each, and it will store the resulting model in =<model-h5-file>=.
+| Red | Green | Blue | Orange | Yellow |
+|-----+-------+------+--------+--------|
 
-In an effort to save storage, pass the =-r= flag as /the last
-argument/ to remove the intermediate files (=<in-file>=,
-=<neural-in-file>=, and =<neural-out-file>=) as soon as possible. This
-is a bad idea if you would rather keep the same data for future
-training runs. If the =-r= flag is not passed, no intermediary files
-will be removed.
+- =<neural-letters-outfile>= holds a similar boolean matrix of letters:
+
+| A | B | C | D | E | F | G | H |
+|---+---+---+---+---+---+---+---|
+
+These each signify the desired meaning of the corresponding line of
+text. Currently, each output entry will have both a color and a
+letter.
+*** Trainers
+**** Flip Trainer
+=text_flip_trainer.py <text-file> <flips-file> <model-output> (<model-input>)=
+
+Trains a neural network and stores it in the HDF5 file
+=<model-output>=. The output is written out once every ten epochs. If
+=<model-input>= is provided, then it will load the weights stored in
+that HDF5 file before continuing training.
+
+=<text-file>= is a csv file with a list of text inputs from [[Generate
+Text Instructions]].
+
+=<flips-file>= is a csv file with a boolean matrix of expected flips
+outputs from [[Generate Text Instructions]].
+**** Colors Trainer
+=text_colors_trainer.py <text-file> <colors-file> <model-output> (<model-input>)=
+
+Trains a neural network and stores it in the HDF5 file
+=<model-output>=. The output is written out once every ten epochs. If
+=<model-input>= is provided, then it will load the weights stored in
+that HDF5 file before continuing training.
+
+=<text-file>= is a csv file with a list of text inputs from [[Generate
+Text Instructions]].
+
+=<colors-file>= is a csv file with a boolean matrix of expected colors
+outputs from [[Generate Text Instructions]].
+**** Letters Trainer
+=text_letters_trainer.py <text-file> <letters-file> <model-output> (<model-input>)=
+
+Trains a neural network and stores it in the HDF5 file
+=<model-output>=. The output is written out once every ten epochs. If
+=<model-input>= is provided, then it will load the weights stored in
+that HDF5 file before continuing training.
+
+=<text-file>= is a csv file with a list of text inputs from [[Generate
+Text Instructions]].
+
+=<letters-file>= is a csv file with a boolean matrix of expected
+letters outputs from [[Generate Text Instructions]].

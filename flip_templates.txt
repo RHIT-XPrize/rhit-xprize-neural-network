@@ -1,2 +1,7 @@
 flip the %c %l block there.
 turn the %c %l over.
+flip %c %l
+flip the %c %l
+flip %l %c
+flip the %l next to the %C %L
+flip over the %c block next to the %L
