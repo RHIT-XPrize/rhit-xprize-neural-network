@@ -92,7 +92,7 @@ Loads up the model files in =<flips-model.h5>=, =<colors-model.h5>=,
 and =<letters-model.h5>= and spins up a simple REPL instance to test
 the model. Sample usage looks like this:
 
-#+BEGIN_QUOTE
+#+BEGIN_SRC
 > Move the red a here
 ('Move', 0.99999213)
 ('red', 0.9981108)
@@ -102,7 +102,7 @@ the model. Sample usage looks like this:
 ('blue', 0.99789387)
 ('None', 0.9977901)
 >
-#+END_QUOTE
+#+END_SRC
 
 It outputs three tuples, each of which holds the guessed meaning and
 the output (out of one) at that output neuron. The first is whether to
