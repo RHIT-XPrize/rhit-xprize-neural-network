@@ -6,10 +6,17 @@ XPrize robot. For more detailed information of the project as a whole,
 see [[https://github.com/RHIT-XPrize/rhit-xprize-pipeline][this repo]].
 
 ** Instructions
-For a quick-and-dirty startup, first =pip3 install --user -r
-requirements.txt=. Then use the =build_neural_network.sh= to generate
-data, split the data, and train the neural network. Usage is described
-below.
+To get started, first =pip3 install --user -r requirements.txt=. Run
+=generate_text_instructions.py= to create sample input and output
+files for the model to train on.
+
+Next, run each of =text_flip_trainer.py=, =text_colors_trainer.py=,
+and =text_letters_trainer.py= on the appropriate output files to train
+the model.
+
+Finally, either run =model_reply.py= to hop into a REPL and test the
+model, or use the =model_runner.py= interface in another program to
+use the generated models.
 ** Usage
 *** Generate Text Instructions
 =generate_text_instructions.py <num-to-generate> <neural-infile> <neural-flips-outfile> <neural-colors-outfile> <neural-letters-outfile>=
@@ -26,17 +33,17 @@ four .csv files =<neural-infile>=, =<neural-flips-outfile>=,
 
 - =<neural-colors-outfile>= holds a boolean matrix of colors:
 
-| Red | Green | Blue | Orange | Yellow |
-|-----+-------+------+--------+--------|
+| Red | Green | Blue | Orange | Yellow | None |
+|-----+-------+------+--------+--------+------|
 
 - =<neural-letters-outfile>= holds a similar boolean matrix of letters:
 
-| A | B | C | D | E | F | G | H |
-|---+---+---+---+---+---+---+---|
+| A | B | C | D | E | F | G | H | None |
+|---+---+---+---+---+---+---+---+------|
 
 These each signify the desired meaning of the corresponding line of
-text. Currently, each output entry will have both a color and a
-letter.
+text. The 'None' columns mean that no color/letter was detected
+(e.g. "Move the blue block" has no letter).
 *** Trainers
 **** Flip Trainer
 =text_flip_trainer.py <text-file> <flips-file> <model-output> (<model-input>)=
@@ -46,11 +53,11 @@ Trains a neural network and stores it in the HDF5 file
 =<model-input>= is provided, then it will load the weights stored in
 that HDF5 file before continuing training.
 
-=<text-file>= is a csv file with a list of text inputs from [[Generate
-Text Instructions]].
+=<text-file>= is a csv file with a list of text inputs from Generate
+Text Instructions.
 
 =<flips-file>= is a csv file with a boolean matrix of expected flips
-outputs from [[Generate Text Instructions]].
+outputs from Generate Text Instructions.
 **** Colors Trainer
 =text_colors_trainer.py <text-file> <colors-file> <model-output> (<model-input>)=
 
@@ -59,11 +66,11 @@ Trains a neural network and stores it in the HDF5 file
 =<model-input>= is provided, then it will load the weights stored in
 that HDF5 file before continuing training.
 
-=<text-file>= is a csv file with a list of text inputs from [[Generate
-Text Instructions]].
+=<text-file>= is a csv file with a list of text inputs from Generate
+Text Instructions.
 
 =<colors-file>= is a csv file with a boolean matrix of expected colors
-outputs from [[Generate Text Instructions]].
+outputs from Generate Text Instructions.
 **** Letters Trainer
 =text_letters_trainer.py <text-file> <letters-file> <model-output> (<model-input>)=
 
@@ -72,8 +79,31 @@ Trains a neural network and stores it in the HDF5 file
 =<model-input>= is provided, then it will load the weights stored in
 that HDF5 file before continuing training.
 
-=<text-file>= is a csv file with a list of text inputs from [[Generate
-Text Instructions]].
+=<text-file>= is a csv file with a list of text inputs from Generate
+Text Instructions.
 
 =<letters-file>= is a csv file with a boolean matrix of expected
-letters outputs from [[Generate Text Instructions]].
+letters outputs from Generate Text Instructions.
+*** Runners
+**** Model REPL
+=model_repl.py <flips-model.h5> <colors-model.h5> <letters-model.h5>=
+
+Loads up the model files in =<flips-model.h5>=, =<colors-model.h5>=,
+and =<letters-model.h5>= and spins up a simple REPL instance to test
+the model. Sample usage looks like this:
+
+#+BEGIN_QUOTE
+> Move the red a here
+('Move', 0.99999213)
+('red', 0.9981108)
+('A', 0.9987594)
+> Flip the blue block
+('Flip', 0.9937981)
+('blue', 0.99789387)
+('None', 0.9977901)
+>
+#+END_QUOTE
+
+It outputs three tuples, each of which holds the guessed meaning and
+the output (out of one) at that output neuron. The first is whether to
+move or to flip, the second is the color, and the third is the letter.
