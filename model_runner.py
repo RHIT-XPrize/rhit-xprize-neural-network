@@ -1,7 +1,10 @@
 import numpy as np
 import operator
 
-import trainer_core as core
+try:
+    from rhit_xprize_neural_network import trainer_core as core
+except ImportError:
+    import trainer_core as core
 
 def load_models(args):
     colors = core.load_colors()
